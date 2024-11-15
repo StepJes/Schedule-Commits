@@ -1,0 +1,37 @@
+name: Auto Commit
+
+# Run the action on a schedule (every day at a random time)
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs once a day at midnight UTC
+
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Make Random Changes and Commit
+      run: |
+        # Generate a random number between 1 and 5
+        NUM_COMMITS=$(shuf -i 1-5 -n 1)
+
+        for i in $(seq 1 $NUM_COMMITS); do
+          # Create a random commit file with a timestamp
+          echo "Auto commit #$i - $(date '+%Y-%m-%d %H:%M:%S')" > commit_file_$i.txt
+          git add commit_file_$i.txt
+
+          # Commit changes with a message
+          git commit -m "Auto commit #$i - $(date '+%Y-%m-%d %H:%M:%S')"
+        done
+
+    - name: Push changes
+      run: |
+        git push origin main
